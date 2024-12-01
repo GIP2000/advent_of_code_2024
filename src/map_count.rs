@@ -84,3 +84,35 @@ where
         return map;
     }
 }
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn test() {
+        let arr = [1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3];
+
+        let counter: Counter<_> = arr.iter().cloned().collect();
+
+        assert_eq!(counter.get(&0), 0);
+        assert_eq!(counter.get(&1), 4);
+        assert_eq!(counter.get(&2), 5);
+        assert_eq!(counter.get(&3), 2);
+        assert_eq!(counter.get(&4), 0);
+    }
+
+    #[test]
+    fn test_with_destructure() {
+        let arr = [1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3];
+
+        let Counter(map) = arr.iter().cloned().collect();
+
+        assert_eq!(map.get(&0), None);
+        assert_eq!(map.get(&1), Some(&4));
+        assert_eq!(map.get(&2), Some(&5));
+        assert_eq!(map.get(&3), Some(&2));
+        assert_eq!(map.get(&4), None);
+    }
+}

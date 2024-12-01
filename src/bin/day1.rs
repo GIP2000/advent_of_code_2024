@@ -1,5 +1,6 @@
-#![feature(iter_next_chunk)]
+#![feature(iter_array_chunks)]
 use advent_of_code_2024::map_count::Counter;
+use core::str::FromStr;
 
 const PUZZLE_INPUT: &'static str = include_str!("input/day1.txt");
 
@@ -11,16 +12,11 @@ fn main() {
 fn part1(input: &str) -> i32 {
     let (mut a, mut b): (Vec<_>, Vec<_>) = input
         .trim()
-        .lines()
-        .map(|line| {
-            let [a, b] = line
-                .split_whitespace()
-                .map(|x| x.parse::<i32>().unwrap())
-                .take(2)
-                .next_chunk()
-                .unwrap();
-            (a, b)
-        })
+        .split_whitespace()
+        .map(i32::from_str)
+        .map(Result::unwrap)
+        .array_chunks()
+        .map(|[a, b]| (a, b))
         .unzip();
 
     a.sort();
@@ -31,22 +27,17 @@ fn part1(input: &str) -> i32 {
 fn part2(input: &str) -> i32 {
     let (a, b): (Vec<_>, Counter<_>) = input
         .trim()
-        .lines()
-        .map(|line| {
-            let [a, b] = line
-                .split_whitespace()
-                .map(|x| x.parse::<i32>().unwrap())
-                .take(2)
-                .next_chunk()
-                .unwrap();
-            (a, b)
-        })
+        .split_whitespace()
+        .map(i32::from_str)
+        .map(Result::unwrap)
+        .array_chunks()
+        .map(|[a, b]| (a, b))
         .unzip();
 
     a.iter()
-        .map(|val| b.get(val))
+        .map(|val| b.get(val) as i32)
         .zip(a.iter())
-        .map(|(a, &b)| a as i32 * b)
+        .map(|(a, b)| a * b)
         .sum()
 }
 
