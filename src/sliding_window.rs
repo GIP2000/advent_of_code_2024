@@ -79,10 +79,4 @@ mod test {
 
         println!("a = {:?}", a.last().map(|b| b));
     }
-
-    #[test]
-    fn test2() {
-        let mut arr: [A; 20] = std::array::from_fn(|i| A(i));
-        // arr.iter_mut().sliding_window::<3>();
-    }
 }

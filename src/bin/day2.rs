@@ -1,4 +1,5 @@
 use advent_of_code_2024::sliding_window::SlidingWindowIteratorTrait;
+use std::str::FromStr;
 
 const PUZZLE_INPUT: &'static str = include_str!("input/day2.txt");
 
@@ -14,13 +15,14 @@ fn part1(input: &str) -> i32 {
         .filter_map(|x| {
             let mut iter = x
                 .split_whitespace()
-                .map(|v| v.parse::<i32>().unwrap())
+                .map(|v| i32::from_str(v).unwrap())
                 .sliding_window()
                 .map(|[a, b]| a - b)
                 .peekable();
 
             let increasing = *iter.peek().unwrap() > 0;
             let range = if increasing { 1..=3 } else { -3..=-1 };
+
             iter.all(|v| range.contains(&v)).then(|| Some(()))
         })
         .count() as i32
@@ -31,8 +33,8 @@ fn part2(input: &str) -> i32 {
         .lines()
         .map(|x| {
             x.split_whitespace()
-                .map(|v| v.parse::<i32>().unwrap())
-                .collect::<Box<[_]>>()
+                .map(|v| v.parse().unwrap())
+                .collect::<Box<[i32]>>()
         })
         .filter(|x| {
             (-1..x.len() as isize).into_iter().any(|skip| {
@@ -43,6 +45,7 @@ fn part2(input: &str) -> i32 {
                     .sliding_window()
                     .map(|[(_, a), (_, b)]| a - b)
                     .peekable();
+
                 let increasing = *iter.peek().unwrap() > 0;
                 let range = if increasing { 1..=3 } else { -3..=-1 };
 
