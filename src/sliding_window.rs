@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct SlidingWindowIterator<T, I, const WINDOW_SIZE: usize>
 where
     T: Clone,

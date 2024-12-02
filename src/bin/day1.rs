@@ -58,6 +58,6 @@ mod test {
 
     #[test]
     fn part2_test() {
-        part2(TEST_INPUT);
+        assert_eq!(part2(TEST_INPUT), 31);
     }
 }
