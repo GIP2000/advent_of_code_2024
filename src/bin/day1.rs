@@ -22,7 +22,7 @@ fn part1(input: &str) -> i32 {
     a.sort();
     b.sort();
 
-    a.iter().zip(b).map(|(a, b)| (a - b).abs()).sum()
+    a.iter().zip(b).map(|(a, b)| a.abs_diff(b) as i32).sum()
 }
 fn part2(input: &str) -> i32 {
     let (a, b): (Vec<_>, Counter<_>) = input
