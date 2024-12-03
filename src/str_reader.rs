@@ -10,11 +10,15 @@ impl<'a> StrReader<'a> {
     }
 
     pub fn peek(&self) -> Option<char> {
-        self.val.chars().nth(self.index)
+        self.val.as_bytes().get(self.index).map(|f| *f as char)
+        // This would be neccisary if the str wasn't ascii but the above is O(1) so...
+        // self.val.chars().nth(self.index)
     }
 
     pub fn read(&mut self) -> Option<char> {
-        let result = self.val.chars().nth(self.index);
+        let result = self.val.as_bytes().get(self.index).map(|f| *f as char);
+        // This would be neccisary if the str wasn't ascii but the above is O(1) so...
+        // let result = self.val.chars().nth(self.index);
         if let Some(_) = result {
             self.index += 1
         }
@@ -32,65 +36,44 @@ impl<'a> StrReader<'a> {
         return (callback)(&self.val[self.index..]);
     }
 
-    pub fn get_quoted(&mut self) -> Option<&'a str> {
-        let mut str_reader = self.clone();
-        let starts_with_quote = str_reader.read().map(|x| x == '"').unwrap_or(false);
-        let start = str_reader.index;
-        if !starts_with_quote {
-            return None;
-        }
-        loop {
-            let val = if let Some(val) = str_reader.read() {
-                val
-            } else {
-                return None;
-            };
-            let peek = str_reader.peek();
-
-            match (val, peek) {
-                ('\\', Some('"')) => {}
-                (_, Some('"')) => {
-                    str_reader.consume(1);
-                    *self = str_reader;
-                    return Some(&self.val[start..self.index - 1]);
-                }
-                _ => {}
-            };
-        }
+    pub fn gen_iter<R, F: Fn(char, &mut Self) -> Option<R>>(
+        self,
+        gen_fn: F,
+    ) -> StrReaderGenerater<'a, R, F> {
+        StrReaderGenerater::new(self, gen_fn)
     }
+}
 
-    pub fn consume_until_end_paren(&mut self) -> bool {
-        let mut str_reader = self.clone();
-        let mut p_count = 0;
-        let mut in_quotes = false;
-        loop {
-            let val = if let Some(val) = str_reader.read() {
-                val
-            } else {
-                return false;
-            };
-            let peek = str_reader.peek();
+pub struct StrReaderGenerater<'a, R, F>
+where
+    F: Fn(char, &mut StrReader<'a>) -> Option<R>,
+{
+    str_reader: StrReader<'a>,
+    gen_fn: F,
+}
 
-            match (val, peek, in_quotes) {
-                ('(', _, false) => p_count += 1,
+impl<'a, R, F> StrReaderGenerater<'a, R, F>
+where
+    F: Fn(char, &mut StrReader<'a>) -> Option<R>,
+{
+    pub fn new(str_reader: StrReader<'a>, gen_fn: F) -> Self {
+        Self { str_reader, gen_fn }
+    }
+}
 
-                (')', _, false) => p_count -= 1,
+impl<'a, R, F> Iterator for StrReaderGenerater<'a, R, F>
+where
+    F: Fn(char, &mut StrReader<'a>) -> Option<R>,
+{
+    type Item = R;
 
-                ('"', _, false) => in_quotes = true,
-
-                ('\\', Some('"'), true) => str_reader.consume(1),
-
-                (_, Some('"'), true) => {
-                    in_quotes = false;
-                    str_reader.consume(1);
-                }
-                _ => {}
-            };
-
-            if p_count == -1 {
-                *self = str_reader;
-                return true;
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(c) = self.str_reader.read() {
+            let result = (self.gen_fn)(c, &mut self.str_reader);
+            if result.is_some() {
+                return result;
             }
         }
+        None
     }
 }

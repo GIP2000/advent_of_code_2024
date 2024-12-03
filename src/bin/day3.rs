@@ -71,37 +71,52 @@ fn parse_enabler(reader: &mut StrReader) -> Option<bool> {
 }
 
 fn part1(input: &str) -> i32 {
-    let mut reader = StrReader::new(input.trim());
-    let mut sum = 0;
-    while let Some(val) = reader.read() {
-        if val == 'm' {
-            if let Some(val) = parse_mul(&mut reader) {
-                sum += val;
-            };
-        }
-    }
-
-    return sum;
+    StrReader::new(input.trim())
+        .gen_iter(|val, reader| {
+            if val == 'm' {
+                return parse_mul(reader);
+            }
+            None
+        })
+        .sum()
 }
 
+enum Op {
+    Muled(i32),
+    Do,
+    Dont,
+}
 fn part2(input: &str) -> i32 {
-    let mut reader = StrReader::new(input.trim());
-    let mut sum = 0;
     let mut enabled = true;
-    while let Some(val) = reader.read() {
-        if val == 'm' && enabled {
-            if let Some(val) = parse_mul(&mut reader) {
-                sum += val;
-            };
-        }
-        if val == 'd' {
-            if let Some(val) = parse_enabler(&mut reader) {
-                enabled = val;
-            }
-        }
-    }
 
-    return sum;
+    StrReader::new(input.trim())
+        .gen_iter(|val, reader| {
+            if val == 'm' {
+                if let Some(muled) = parse_mul(reader) {
+                    return Some(Op::Muled(muled));
+                }
+            };
+            if val == 'd' {
+                if let Some(val) = parse_enabler(reader) {
+                    return if val { Some(Op::Do) } else { Some(Op::Dont) };
+                }
+            };
+
+            None
+        })
+        .filter_map(|v| match (v, enabled) {
+            (Op::Muled(v), true) => Some(v),
+            (Op::Muled(_), false) => None,
+            (Op::Do, _) => {
+                enabled = true;
+                None
+            }
+            (Op::Dont, _) => {
+                enabled = false;
+                None
+            }
+        })
+        .sum()
 }
 
 #[cfg(test)]
