@@ -72,11 +72,9 @@ fn parse_enabler(reader: &mut StrReader) -> Option<bool> {
 
 fn part1(input: &str) -> i32 {
     StrReader::new(input.trim())
-        .gen_iter(|val, reader| {
-            if val == 'm' {
-                return parse_mul(reader);
-            }
-            None
+        .gen_iter(|val, reader| match val {
+            'm' => parse_mul(reader),
+            _ => None,
         })
         .sum()
 }
@@ -90,19 +88,10 @@ fn part2(input: &str) -> i32 {
     let mut enabled = true;
 
     StrReader::new(input.trim())
-        .gen_iter(|val, reader| {
-            if val == 'm' {
-                if let Some(muled) = parse_mul(reader) {
-                    return Some(Op::Muled(muled));
-                }
-            };
-            if val == 'd' {
-                if let Some(val) = parse_enabler(reader) {
-                    return if val { Some(Op::Do) } else { Some(Op::Dont) };
-                }
-            };
-
-            None
+        .gen_iter(|val, reader| match val {
+            'm' => parse_mul(reader).map(|muled| Op::Muled(muled)),
+            'd' => parse_enabler(reader).map(|val| if val { Op::Do } else { Op::Dont }),
+            _ => None,
         })
         .filter_map(|v| match (v, enabled) {
             (Op::Muled(v), true) => Some(v),
