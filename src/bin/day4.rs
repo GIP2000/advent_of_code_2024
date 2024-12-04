@@ -1,3 +1,4 @@
+#![feature(str_as_str)]
 const PUZZLE_INPUT: &'static str = include_str!("input/day4.txt");
 
 fn main() {
@@ -7,18 +8,18 @@ fn main() {
 
 fn search_horizontal(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> i32 {
     let mut sum = 0;
-    let forward_slice: String = mat[row_idx][col_idx..(col_idx + 4).min(mat[row_idx].len())]
+    let forward_slice: Box<str> = mat[row_idx][col_idx..(col_idx + 4).min(mat[row_idx].len())]
         .iter()
         .collect();
-    let backward_slice: String = mat[row_idx][(col_idx.saturating_sub(3))..=col_idx]
+    let backward_slice: Box<str> = mat[row_idx][(col_idx.saturating_sub(3))..=col_idx]
         .iter()
         .rev()
         .collect();
 
-    if forward_slice == "xmas" {
+    if forward_slice.as_str() == "xmas" {
         sum += 1
     };
-    if backward_slice == "xmas" {
+    if backward_slice.as_str() == "xmas" {
         sum += 1
     };
     sum
@@ -26,21 +27,21 @@ fn search_horizontal(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> i3
 
 fn search_verticle(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> i32 {
     let mut sum = 0;
-    let forward_slice: String = mat[row_idx..(row_idx + 4).min(mat.len())]
+    let forward_slice: Box<str> = mat[row_idx..(row_idx + 4).min(mat.len())]
         .iter()
         .map(|x| x[col_idx])
         .collect();
 
-    let backward_slice: String = mat[row_idx.saturating_sub(3)..=row_idx]
+    let backward_slice: Box<str> = mat[row_idx.saturating_sub(3)..=row_idx]
         .iter()
         .map(|x| x[col_idx])
         .rev()
         .collect();
 
-    if forward_slice == "xmas" {
+    if forward_slice.as_str() == "xmas" {
         sum += 1
     };
-    if backward_slice == "xmas" {
+    if backward_slice.as_str() == "xmas" {
         sum += 1
     };
     sum
@@ -49,18 +50,18 @@ fn search_verticle(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> i32 
 fn search_diagnal(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> i32 {
     let mut sum = 0;
 
-    let top_left: String = mat[row_idx..]
+    let top_left: Box<str> = mat[row_idx..]
         .iter()
         .take(4)
         .enumerate()
         .filter_map(|(i, row)| row.get(col_idx + i))
         .collect();
 
-    if top_left == "xmas" {
+    if top_left.as_str() == "xmas" {
         sum += 1
     }
 
-    let bot_right: String = mat[..=row_idx]
+    let bot_right: Box<str> = mat[..=row_idx]
         .iter()
         .rev()
         .take(4)
@@ -72,11 +73,11 @@ fn search_diagnal(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> i32 {
         })
         .collect();
 
-    if bot_right == "xmas" {
+    if bot_right.as_str() == "xmas" {
         sum += 1
     }
 
-    let bot_left: String = mat[..=row_idx]
+    let bot_left: Box<str> = mat[..=row_idx]
         .iter()
         .rev()
         .take(4)
@@ -84,12 +85,12 @@ fn search_diagnal(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> i32 {
         .filter_map(|(i, row)| row.get(col_idx + i))
         .collect();
 
-    if bot_left == "xmas" {
+    if bot_left.as_str() == "xmas" {
         sum += 1
     }
 
     // top right
-    let top_right: String = mat[row_idx..]
+    let top_right: Box<str> = mat[row_idx..]
         .iter()
         .take(4)
         .enumerate()
@@ -99,7 +100,7 @@ fn search_diagnal(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> i32 {
         })
         .collect();
 
-    if top_right == "xmas" {
+    if top_right.as_str() == "xmas" {
         sum += 1
     }
 
@@ -133,20 +134,20 @@ fn part1(input: &str) -> i32 {
 }
 
 fn check_x(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> bool {
-    let top_left: String = mat[row_idx..]
+    let top_left: Box<str> = mat[row_idx..]
         .iter()
         .take(3)
         .enumerate()
         .filter_map(|(i, row)| row.get(col_idx + i))
         .collect();
 
-    if top_left != "mas" && top_left != "sam" {
+    if top_left.as_str() != "mas" && top_left.as_str() != "sam" {
         return false;
     }
 
     let col_idx = col_idx + 2;
 
-    let top_right: String = mat[row_idx..]
+    let top_right: Box<str> = mat[row_idx..]
         .iter()
         .take(3)
         .enumerate()
@@ -156,7 +157,7 @@ fn check_x(row_idx: usize, col_idx: usize, mat: &Vec<Vec<char>>) -> bool {
         })
         .collect();
 
-    if top_right != "mas" && top_right != "sam" {
+    if top_right.as_str() != "mas" && top_right.as_str() != "sam" {
         return false;
     }
 
