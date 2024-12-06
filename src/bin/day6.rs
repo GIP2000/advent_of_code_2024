@@ -61,7 +61,7 @@ fn part1(input: &str) -> i32 {
                     }
                     b'#' => GridElement::Item,
                     b'.' => GridElement::Empty,
-                    _ => unreachable!(""),
+                    _ => unreachable!("value should not be in input {}", el),
                 })
                 .collect()
         })
