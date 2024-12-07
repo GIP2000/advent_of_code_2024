@@ -57,13 +57,12 @@ mod test {
 
     use super::*;
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq, Eq)]
     struct A(usize);
 
     #[test]
     fn test() {
         let arr: [A; 20] = std::array::from_fn(|i| A(i));
-        println!("arr = {arr:?}");
         let a = arr
             .iter()
             .sliding_window()
@@ -77,6 +76,9 @@ mod test {
             })
             .collect::<Vec<_>>();
 
-        println!("a = {:?}", a.last().map(|b| b));
+        assert_eq!(
+            a,
+            vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+        )
     }
 }
