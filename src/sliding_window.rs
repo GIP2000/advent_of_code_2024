@@ -1,29 +1,28 @@
 #[derive(Clone)]
-pub struct SlidingWindowIterator<T, I, const WINDOW_SIZE: usize>
+pub struct SlidingWindowIterator<I, const WINDOW_SIZE: usize>
 where
-    T: Clone,
-    I: Iterator<Item = T>,
+    I: Iterator,
 {
     iter: I,
-    window: Option<[T; WINDOW_SIZE]>,
+    window: Option<[I::Item; WINDOW_SIZE]>,
 }
 
-impl<T, I, const WINDOW_SIZE: usize> SlidingWindowIterator<T, I, WINDOW_SIZE>
+impl<I, const WINDOW_SIZE: usize> SlidingWindowIterator<I, WINDOW_SIZE>
 where
-    T: Clone,
-    I: Iterator<Item = T>,
+    I: Iterator,
+    I::Item: Clone,
 {
     pub fn new(iter: I) -> Self {
         Self { iter, window: None }
     }
 }
 
-impl<T, I, const WINDOW_SIZE: usize> Iterator for SlidingWindowIterator<T, I, WINDOW_SIZE>
+impl<I, const WINDOW_SIZE: usize> Iterator for SlidingWindowIterator<I, WINDOW_SIZE>
 where
-    T: Clone,
-    I: Iterator<Item = T>,
+    I: Iterator,
+    I::Item: Clone,
 {
-    type Item = [T; WINDOW_SIZE];
+    type Item = [I::Item; WINDOW_SIZE];
 
     fn next(&mut self) -> Option<Self::Item> {
         match &mut self.window {
@@ -42,15 +41,21 @@ where
     }
 }
 
-pub trait SlidingWindowIteratorTrait<T: Clone>: Iterator<Item = T> + Sized {
-    fn sliding_window<const WINDOW_SIZE: usize>(
-        self,
-    ) -> SlidingWindowIterator<T, Self, WINDOW_SIZE> {
+pub trait SlidingWindowIteratorTrait: Iterator + Sized
+where
+    Self::Item: Clone,
+{
+    fn sliding_window<const WINDOW_SIZE: usize>(self) -> SlidingWindowIterator<Self, WINDOW_SIZE> {
         SlidingWindowIterator::new(self)
     }
 }
 
-impl<T: Clone, I: Iterator<Item = T>> SlidingWindowIteratorTrait<T> for I {}
+impl<I> SlidingWindowIteratorTrait for I
+where
+    I: Iterator,
+    I::Item: Clone,
+{
+}
 
 #[cfg(test)]
 mod test {
@@ -59,10 +64,15 @@ mod test {
 
     #[derive(Debug, PartialEq, Eq)]
     struct A(usize);
+    #[test]
+    fn test_mut() {
+        let arr: [A; 20] = std::array::from_fn(|i| A(i));
+    }
 
     #[test]
     fn test() {
         let arr: [A; 20] = std::array::from_fn(|i| A(i));
+
         let a = arr
             .iter()
             .sliding_window()
