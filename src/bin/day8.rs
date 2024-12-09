@@ -1,4 +1,4 @@
-use advent_of_code_2024::combo::ComboIterTrait;
+use advent_of_code_2024::{combo::ComboIterTrait, optional_iter::OptionIter};
 use std::collections::HashSet;
 
 const PUZZLE_INPUT: &'static str = include_str!("input/day8.txt");
@@ -27,9 +27,9 @@ fn part1(input: &str) -> i32 {
                 })
         })
         .combo()
-        .filter_map(|(((ax, ay), byte_a), ((bx, by), byte_b))| {
+        .flat_map(|(((ax, ay), byte_a), ((bx, by), byte_b))| {
             if byte_b != byte_a {
-                return None;
+                return OptionIter::None;
             }
 
             let dx = ax.abs_diff(bx);
@@ -62,9 +62,8 @@ fn part1(input: &str) -> i32 {
                 None
             };
 
-            Some([first, second])
+            OptionIter::Some([first, second].into_iter().filter_map(|x| x))
         })
-        .flat_map(|x| x.into_iter().filter_map(|x| x))
         .collect::<HashSet<_>>()
         .len() as i32
 }
