@@ -1,4 +1,4 @@
-use advent_of_code_2024::str_reader::StrReader;
+use advent_of_code_2024::str_reader::{StrReader, StrReaderIter};
 
 const PUZZLE_INPUT: &'static str = include_str!("input/day3.txt");
 
@@ -71,8 +71,10 @@ fn parse_enabler(reader: &mut StrReader) -> Option<bool> {
 }
 
 fn part1(input: &str) -> i32 {
-    StrReader::new(input.trim())
-        .gen_iter(|val, reader| match val {
+    // StrReader::new(input.trim())
+    input
+        .trim()
+        .reader_gen_iter(|val, reader| match val {
             'm' => parse_mul(reader),
             _ => None,
         })
@@ -87,8 +89,9 @@ enum Op {
 fn part2(input: &str) -> i32 {
     let mut enabled = true;
 
-    StrReader::new(input.trim())
-        .gen_iter(|val, reader| match val {
+    input
+        .trim()
+        .reader_gen_iter(|val, reader| match val {
             'm' => parse_mul(reader).map(|muled| Op::Muled(muled)),
             'd' => parse_enabler(reader).map(|val| if val { Op::Do } else { Op::Dont }),
             _ => None,

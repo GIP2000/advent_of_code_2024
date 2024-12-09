@@ -44,6 +44,22 @@ impl<'a> StrReader<'a> {
     }
 }
 
+pub trait StrReaderIter<'a> {
+    fn reader_gen_iter<R, F: Fn(char, &mut StrReader<'a>) -> Option<R>>(
+        self,
+        gen_fn: F,
+    ) -> StrReaderGenerater<'a, R, F>;
+}
+
+impl<'a> StrReaderIter<'a> for &'a str {
+    fn reader_gen_iter<R, F: Fn(char, &mut StrReader<'a>) -> Option<R>>(
+        self,
+        gen_fn: F,
+    ) -> StrReaderGenerater<'a, R, F> {
+        StrReader::new(self).gen_iter(gen_fn)
+    }
+}
+
 pub struct StrReaderGenerater<'a, R, F>
 where
     F: Fn(char, &mut StrReader<'a>) -> Option<R>,
