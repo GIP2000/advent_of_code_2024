@@ -159,9 +159,12 @@ fn part2(input: &str) -> usize {
                 FileSpace::Full { id: _, len: _ } => unreachable!("This should always be empty"),
                 FileSpace::Empty(size) => *size -= len,
             }
+            // keep in mind you just added one so now you need to shit over to the right to
+            // compensate
             end_p += 1;
         }
 
+        // combine empties
         match (
             end_p.checked_sub(1).and_then(|d| file_sys.get(d)),
             &file_sys.get(end_p + 1),
@@ -169,17 +172,21 @@ fn part2(input: &str) -> usize {
             (Some(FileSpace::Empty(s1)), Some(FileSpace::Empty(s2))) => {
                 file_sys[end_p] = FileSpace::Empty(len + s1 + s2);
                 file_sys.remove(end_p - 1);
+                // keep in mind that you just removed an element so its not +1 its just + 1 -1 = 0
                 file_sys.remove(end_p);
+                // compensate for the removed element so we don't skip stuff
                 end_p -= 2;
             }
             (None, Some(FileSpace::Empty(s))) => {
                 file_sys[end_p] = FileSpace::Empty(len + s);
                 file_sys.remove(end_p + 1);
+                // compensate for the removed element so we don't skip stuff
                 end_p -= 1;
             }
             (Some(FileSpace::Empty(s)), None) => {
                 file_sys[end_p] = FileSpace::Empty(len + s);
                 file_sys.remove(end_p - 1);
+                // compensate for the removed element so we don't skip stuff
                 end_p -= 1;
             }
             _ => file_sys[end_p] = FileSpace::Empty(len),
